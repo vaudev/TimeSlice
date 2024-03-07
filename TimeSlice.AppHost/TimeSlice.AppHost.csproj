@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TimeSlice.ApiService\TimeSlice.ApiService.csproj" />
+    <ProjectReference Include="..\TimeSlice.WebApp\TimeSlice.WebApp.Client\TimeSlice.WebApp.Client.csproj" />
+    <ProjectReference Include="..\TimeSlice.WebApp\TimeSlice.WebApp\TimeSlice.WebApp.csproj" />
+    <ProjectReference Include="..\TimeSlice.Web\TimeSlice.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting" Version="8.0.0-preview.3.24105.21" />
+  </ItemGroup>
+
+</Project>
