@@ -6,13 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>72a44cfc-1eda-48be-9efa-fefb688de0be</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TimeSlice.ApiService\TimeSlice.ApiService.csproj" />
     <ProjectReference Include="..\TimeSlice.WebApp\TimeSlice.WebApp.Client\TimeSlice.WebApp.Client.csproj" />
     <ProjectReference Include="..\TimeSlice.WebApp\TimeSlice.WebApp\TimeSlice.WebApp.csproj" />
-    <ProjectReference Include="..\TimeSlice.Web\TimeSlice.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
