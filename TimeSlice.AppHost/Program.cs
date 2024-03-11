@@ -19,16 +19,12 @@ var sqlDatabase = builder.AddSqlServerContainer( "sql", sqlpw, 1400 )
     .AddDatabase( "timeSliceSql" );
 
 
-var cache = builder.AddRedis( "cache" );
+//var cache = builder.AddRedis( "cache" );
 
 var apiService = builder.AddProject<Projects.TimeSlice_ApiService>( "apiservice" )
     .WithReference( sqlDatabase );
 
 builder.AddProject<Projects.TimeSlice_WebApp>( "webapp" )
-    .WithReference( cache )
-    .WithReference( apiService );
-
-builder.AddProject<Projects.TimeSlice_WebApp_Client>( "webapp-client" )
     .WithReference( apiService );
 
 builder.Build().Run();

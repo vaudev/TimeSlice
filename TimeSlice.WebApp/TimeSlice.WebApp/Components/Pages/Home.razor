@@ -1,7 +1,50 @@
 ﻿@page "/"
 
+@using Microsoft.AspNetCore.Components.Forms
+@using TimeSlice.WebApp.Services.Base
+
+@inject ApiService _apiService
+
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="userModel" OnSubmit="@SubmitForm" FormName="usernameForm">
+            <DataAnnotationsValidator />
+
+            <div class="form-group mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <InputText id="username" @bind-Value="userModel.Username" class="form-control" />
+                <ValidationMessage For="@(() => userModel.Username)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    private UserModel userModel { get; set; } = new();
+
+    private async Task SubmitForm()
+    {
+        var result = await _apiService.RegisterorloginAsync(userModel.Username);
+
+        if(!result.Success)
+        {
+            Console.WriteLine( $"Login failed" );
+            return;
+        }
+
+        Console.WriteLine( $"Account created or logged in: {result.User.UserName}" );
+    }
+
+    public class UserModel
+    {
+        public string Username { get; set; }
+    }
+}

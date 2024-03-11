@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TimeSlice.ApiService.Configurations;
 using TimeSlice.ApiService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,8 @@ var connectionString = builder.Configuration.GetConnectionString( "DefaultConnec
 builder.Services.AddDbContext<ApplicationDbContext>( options =>
     options.UseSqlServer( connectionString ) );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddAutoMapper( typeof( MapperConfig ) );
 
 
 builder.Services.AddIdentityCore<ApplicationUser>( options => options.SignIn.RequireConfirmedAccount = true )

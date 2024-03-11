@@ -1,4 +1,4 @@
-﻿using BookStoreApp.API.Models.User;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using System.Text.Encodings.Web;
+using TimeSlice.ApiService.Configurations;
 using TimeSlice.ApiService.Data;
+using TimeSlice.ApiService.Models.Auth;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace TimeSlice.ApiService.Controllers
@@ -21,70 +23,66 @@ namespace TimeSlice.ApiService.Controllers
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IEmailSender<ApplicationUser> _emailSender;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IMapper _mapper;
 
         public AuthController( ILogger<AuthController> logger,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             IEmailSender<ApplicationUser> emailSender,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IMapper mapper)
         {
             _logger = logger;
             _userManager = userManager;
             _userStore = userStore;
             _emailSender = emailSender;
             _signInManager = signInManager;
+            _mapper = mapper;
         }
 
+
         [HttpPost]
-        [Route( "register" )]
-        public async Task<ActionResult<AuthResponse>> Register(string email, string password, string returnUrl)
+        [Route( "registerorlogin" )]
+        public async Task<ActionResult<AuthResponse>> RegisterOrLogin( string username )
         {
-            var user = CreateUser();
+            var user = await _userManager.FindByNameAsync( username );
 
-            await _userStore.SetUserNameAsync( user, email, CancellationToken.None );
-
-            var emailStore = GetEmailStore();
-            await emailStore.SetEmailAsync( user, email, CancellationToken.None );
-            var result = await _userManager.CreateAsync( user, password);
-
-            if (!result.Succeeded)
+            // Automatically create a user if it doesn't exist
+            if (user == null)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError( error.Code, error.Description );
-                }
+                user = CreateUser();
 
-                return BadRequest( ModelState );
+                await _userStore.SetUserNameAsync( user, username, CancellationToken.None );
+
+                var email = $"{username}@timeslice.com";
+                var emailStore = GetEmailStore();
+                await emailStore.SetEmailAsync( user, username, CancellationToken.None );
+
+                var result = await _userManager.CreateAsync( user, "P@ssword1!" );
+
+                if (!result.Succeeded)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError( error.Code, error.Description );
+                    }
+
+                    return BadRequest( ModelState );
+                }
             }
 
-            var userId = await _userManager.GetUserIdAsync( user );
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync( user );
-            code = WebEncoders.Base64UrlEncode( Encoding.UTF8.GetBytes( code ) );
-
-            //var callbackUrl = _navigationManager.GetUriWithQueryParameters(
-            //    _navigationManager.ToAbsoluteUri( "Account/ConfirmEmail" ).AbsoluteUri,
-            //    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = returnUrl } );
-
-            //await _emailSender.SendConfirmationLinkAsync( user, email, HtmlEncoder.Default.Encode( callbackUrl ) );
+            //var userId = await _userManager.GetUserIdAsync( user );
+            var userDto = _mapper.Map<ApplicationUserDto>( user );
 
             var response = new AuthResponse()
             {
-                UserId = userId,
-                RequireConfirmation = false,
+                User = userDto,
                 Success = true
             };
 
-            if ( _userManager.Options.SignIn.RequireConfirmedAccount )
-            {
-                response.Success = false;
-                response.RequireConfirmation = true;
-                return response;
-            }
-
-            await _signInManager.SignInAsync( user, isPersistent: false );
+            //await _signInManager.SignInAsync( user, isPersistent: false );
             return response;
         }
-
 
         private ApplicationUser CreateUser()
         {
