@@ -4,11 +4,15 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using TimeSlice.ApiService.Configurations;
 using TimeSlice.ApiService.Data;
 using TimeSlice.ApiService.Models.Auth;
+using TimeSlice.ApiService.Static;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace TimeSlice.ApiService.Controllers
@@ -22,24 +26,23 @@ namespace TimeSlice.ApiService.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IEmailSender<ApplicationUser> _emailSender;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
         public AuthController( ILogger<AuthController> logger,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             IEmailSender<ApplicationUser> emailSender,
-            SignInManager<ApplicationUser> signInManager,
-            IMapper mapper)
+            IMapper mapper,
+            IConfiguration configuration )
         {
             _logger = logger;
             _userManager = userManager;
             _userStore = userStore;
             _emailSender = emailSender;
-            _signInManager = signInManager;
             _mapper = mapper;
+            _configuration = configuration; 
         }
-
 
         [HttpPost]
         [Route( "registerorlogin" )]
@@ -73,14 +76,15 @@ namespace TimeSlice.ApiService.Controllers
 
             //var userId = await _userManager.GetUserIdAsync( user );
             var userDto = _mapper.Map<ApplicationUserDto>( user );
+            var tokenString = await GenerateToken( user );
 
             var response = new AuthResponse()
             {
+                Token = tokenString,
                 User = userDto,
                 Success = true
             };
 
-            //await _signInManager.SignInAsync( user, isPersistent: false );
             return response;
         }
 
@@ -104,6 +108,37 @@ namespace TimeSlice.ApiService.Controllers
                 throw new NotSupportedException( "The default UI requires a user store with email support." );
             }
             return (IUserEmailStore<ApplicationUser>) _userStore;
+        }
+
+        private async Task<string> GenerateToken( ApplicationUser user )
+        {
+            var securityKey = new SymmetricSecurityKey( Encoding.UTF8.GetBytes( _configuration["JwtSettings:Key"] ) );
+            var credentials = new SigningCredentials( securityKey, SecurityAlgorithms.HmacSha256 );
+
+            var roles = await _userManager.GetRolesAsync( user );
+            var roleClaims = roles.Select( q => new Claim( ClaimTypes.Role, q ) ).ToList();
+
+            var dbClaims = await _userManager.GetClaimsAsync( user );
+
+            var claims = new List<Claim>()
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(CustomClaimTypes.Uid, user.Id )
+            }
+            .Union( roleClaims )
+            .Union( dbClaims );
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours( Convert.ToInt32( _configuration["JwtSettings:Duration"] ) ),
+                signingCredentials: credentials
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken( token );
         }
 
     }

@@ -1,9 +1,11 @@
 ﻿@page "/"
 
 @using Microsoft.AspNetCore.Components.Forms
+@using TimeSlice.WebApp.Services.Auth
 @using TimeSlice.WebApp.Services.Base
 
-@inject ApiService _apiService
+@inject IAuthenticationService _authService
+@inject NavigationManager _navigationManager
 
 <PageTitle>Home</PageTitle>
 
@@ -32,15 +34,12 @@
 
     private async Task SubmitForm()
     {
-        var result = await _apiService.RegisterorloginAsync(userModel.Username);
+        var isSuccess = await _authService.RegisterOrLogin(userModel.Username);
 
-        if(!result.Success)
+        if (isSuccess)
         {
-            Console.WriteLine( $"Login failed" );
-            return;
+            _navigationManager.NavigateTo( "/weather" );
         }
-
-        Console.WriteLine( $"Account created or logged in: {result.User.UserName}" );
     }
 
     public class UserModel

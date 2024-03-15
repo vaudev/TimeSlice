@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeSlice.ServiceDefaults",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeSlice.ApiService", "TimeSlice.ApiService\TimeSlice.ApiService.csproj", "{FA4A8507-5B20-49B5-BDBE-DBCADD547866}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSlice.WebApp", "TimeSlice.WebApp\TimeSlice.WebApp\TimeSlice.WebApp.csproj", "{40E4E8F3-01D3-473E-912F-0F99B89F754C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeSlice.WebApp", "TimeSlice.WebApp\TimeSlice.WebApp\TimeSlice.WebApp.csproj", "{40E4E8F3-01D3-473E-912F-0F99B89F754C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeSlice.WebApp.Client", "TimeSlice.WebApp\TimeSlice.WebApp.Client\TimeSlice.WebApp.Client.csproj", "{7B28EEE1-645A-42FD-9EAA-4964690EB3AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimeSlice.WebApp.Client", "TimeSlice.WebApp\TimeSlice.WebApp.Client\TimeSlice.WebApp.Client.csproj", "{7B28EEE1-645A-42FD-9EAA-4964690EB3AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

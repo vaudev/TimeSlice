@@ -1,0 +1,16 @@
+﻿@page "/logout"
+@using TimeSlice.WebApp.Services.Auth
+@inject IAuthenticationService _authService
+@inject NavigationManager _navManager
+
+<h3>Logout</h3>
+
+@code {
+    protected override async void OnInitialized()
+    {
+        base.OnInitialized();
+
+        await _authService.Logout();
+        _navManager.NavigateTo("/weather");
+    }
+}
