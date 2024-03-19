@@ -1,8 +1,5 @@
-﻿using Blazored.LocalStorage;
-using Blazored.SessionStorage;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json.Linq;
 using TimeSlice.WebApp.Providers;
 using TimeSlice.WebApp.Services.Base;
 using TimeSlice.WebApp.Static;
@@ -12,13 +9,11 @@ namespace TimeSlice.WebApp.Services.Auth
     public class AuthenticationService : IAuthenticationService
     {
         private readonly ApiService _apiService;
-        private readonly IMemoryCache _tokenStorage;
         private readonly ApiAuthenticationStateProvider _stateProvider;
 
-        public AuthenticationService( ApiService httpClient, IMemoryCache tokenStorage, AuthenticationStateProvider stateProvider )
+        public AuthenticationService( ApiService httpClient, AuthenticationStateProvider stateProvider )
         {
             _apiService = httpClient;
-            _tokenStorage = tokenStorage;
             _stateProvider = (ApiAuthenticationStateProvider) stateProvider;
         }
 
@@ -30,8 +25,7 @@ namespace TimeSlice.WebApp.Services.Auth
 
                 if(result.Success)
                 {
-                    _tokenStorage.Set( Keys.AccessToken, result.Token, TimeSpan.FromHours(1) );
-                    await _stateProvider.LoggedInAsync();
+                    await _stateProvider.LoggedInAsync( result.Token );
                 }
 
                 return result.Success;

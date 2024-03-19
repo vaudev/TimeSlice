@@ -1,5 +1,6 @@
-using Blazored.SessionStorage;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor.Services;
 using TimeSlice.WebApp.Components;
 using TimeSlice.WebApp.Providers;
 using TimeSlice.WebApp.Services.Auth;
@@ -10,18 +11,19 @@ var builder = WebApplication.CreateBuilder( args );
 builder.AddServiceDefaults();
 builder.Services.AddHttpClient<ApiService>( client => client.BaseAddress = new( "http://apiservice" ) );
 
-builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>( q => q.GetRequiredService<ApiAuthenticationStateProvider>() );
-builder.Services.AddMemoryCache();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 

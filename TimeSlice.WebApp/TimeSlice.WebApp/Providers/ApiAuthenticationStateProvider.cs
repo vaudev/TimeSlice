@@ -1,7 +1,5 @@
 ﻿using Blazored.LocalStorage;
-using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.Caching.Memory;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TimeSlice.WebApp.Static;
@@ -10,10 +8,10 @@ namespace TimeSlice.WebApp.Providers
 {
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly IMemoryCache _tokenStorage;
+        private readonly ILocalStorageService _tokenStorage;
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
-        public ApiAuthenticationStateProvider( IMemoryCache tokenStorage )
+        public ApiAuthenticationStateProvider( ILocalStorageService tokenStorage )
         {
             _tokenStorage = tokenStorage;
             _tokenHandler = new JwtSecurityTokenHandler();
@@ -23,7 +21,7 @@ namespace TimeSlice.WebApp.Providers
         {
             var user = new ClaimsPrincipal( new ClaimsIdentity() );
 
-            var tokenString = _tokenStorage.Get<string>( Keys.AccessToken );
+            var tokenString = await _tokenStorage.GetItemAsync<string>( Keys.AccessToken );
             if (tokenString == null)
             {
                 return new AuthenticationState( user );
@@ -42,8 +40,9 @@ namespace TimeSlice.WebApp.Providers
             return new AuthenticationState( user );
         }
 
-        public async Task LoggedInAsync()
+        public async Task LoggedInAsync( string token )
         {
+            await _tokenStorage.SetItemAsync( Keys.AccessToken, token );
             var claims = await GetClaims();
             var user = new ClaimsPrincipal( new ClaimsIdentity( claims, Keys.AuthType ) );
             var authState = Task.FromResult( new AuthenticationState( user ) );
@@ -52,7 +51,7 @@ namespace TimeSlice.WebApp.Providers
 
         public async Task LoggedOut()
         {
-            _tokenStorage.Remove( Keys.AccessToken );
+            await _tokenStorage.RemoveItemAsync( Keys.AccessToken );
             var nobody = new ClaimsPrincipal( new ClaimsIdentity() );
             var authState = Task.FromResult( new AuthenticationState( nobody ) );
             NotifyAuthenticationStateChanged( authState );
@@ -60,7 +59,7 @@ namespace TimeSlice.WebApp.Providers
 
         private async Task<List<Claim>> GetClaims()
         {
-            var savedToken = _tokenStorage.Get<string>( Keys.AccessToken );
+            var savedToken = await _tokenStorage.GetItemAsync<string>( Keys.AccessToken );
             var tokenContent = _tokenHandler.ReadJwtToken( savedToken );
             var claims = tokenContent.Claims.ToList();
             claims.Add( new Claim( ClaimTypes.Name, tokenContent.Subject ) );
