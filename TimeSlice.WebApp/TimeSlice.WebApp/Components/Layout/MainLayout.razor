@@ -1,7 +1,7 @@
 ﻿@using TimeSlice.WebApp.Components.Themes
 @inherits LayoutComponentBase
 
-<MyMudThemeProvider />
+<MyMudThemeProvider/>
 <MyMudProviders />
 
 <MudLayout>
@@ -13,7 +13,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" Href="/"/>
             </NotAuthorized>
             <Authorized>
-                <MudButtonGroup Color="Color.Secondary" Variant="Variant.Filled">
+                <MudButtonGroup Color="Color.Tertiary" Variant="Variant.Filled">
                     <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Inherit" Href="counter" />
                     <MudIconButton Icon="@Icons.Material.Filled.List" Color="Color.Inherit" Href="weather" />
                 </MudButtonGroup>
@@ -24,7 +24,7 @@
         </AuthorizeView>
     </MudAppBar>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraSmall" Style="@($"background:{Colors.Grey.Lighten1};")">
+        <MudContainer MaxWidth="MaxWidth.ExtraSmall">
             <MudGrid Justify="Justify.Center" Class="my-4 pt-4">
                 <MudItem>
                     @Body
