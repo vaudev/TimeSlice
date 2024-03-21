@@ -32,7 +32,7 @@
             {
                 DateTime hours = day.AddHours( hour );
 
-                <div class="hour day-cellule noselect cursor-pointer"
+                <div class="hour day-cellule noselect cursor-pointer mouseover-effect"
                     ondragover="event.preventDefault();this.style.fontWeight='600';"
                     ondragleave="this.style.fontWeight='100';"
                     @ondrop:preventDefault="true"
@@ -61,7 +61,7 @@
                             classPin = string.IsNullOrWhiteSpace( t.Comment ) ? null : " pin";
                             classPointer = " cursor-pointer";
 
-                            <div class="@($"hour-task {classPin}{classPointer} border-top border-bottom")"
+                            <div class="@($"hour-task {classPin}{classPointer} border-top border-bottom mouseover-effect")"
                                  style="grid-column-start: @column; @taskColor"
                                  draggable="@Draggable.ToString()"
                             @ondragstart="() => HandleDragStart(t.ID)"
@@ -75,12 +75,13 @@
 
                     if(!taskDetected)
                     {
-                        <div class="hour-notask day-cellule noselect cursor-pointer"
+                        <div class="hour-notask mouseover-effect day-cellule noselect cursor-pointer"
                              ondragover="event.preventDefault();this.style.fontWeight='600';"
                              ondragleave="this.style.fontWeight='100';"
                              @ondrop:preventDefault="true"
                              @ondrop="() => HandleDayOnDrop(hours)"
                              @onclick="e => ClickDayInternal(e, hours)">
+                             +
                         </div>                        
                     }
                 }

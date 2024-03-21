@@ -14,7 +14,7 @@
 }
 
 .hours {
-    border: 1px solid #c6c6c6;
+    border: 1px solid #c6cfc6;
     flex: 1;
     display: grid;
     justify-content: stretch;
@@ -25,9 +25,7 @@
     grid-column-start: 1;
     font-size: 0.8em;
     padding-left: 0.5em;
-    background-color: lightgreen
 }
-
 
 .hour-task {
     text-align: center;
@@ -45,15 +43,15 @@
     text-overflow: ellipsis;
 }
 
+.mouseover-effect:hover {
+    background-color: #007BA7;
+    color: white;
+}
+
 .statistics {
     display: grid;
     width: 100%;
     overflow: auto;
-}
-
-.mouseover-effect {
-    background-color: lightblue; /* Change background color on mouseover */
-    color: white; /* Change text color on mouseover */
 }
 
 @media only screen and (max-width: 587px) {
