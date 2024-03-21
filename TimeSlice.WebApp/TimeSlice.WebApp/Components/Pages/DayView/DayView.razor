@@ -1,0 +1,94 @@
+﻿@using BlazorCalendar
+﻿@using System.Globalization
+@using BlazorCalendar.Models
+@using BlazorCalendar.Styles
+
+@inherits CalendarBase
+
+@{
+    //string[] dayNames = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
+    //string? isHidden = DisplayedView == DisplayedView.Weekly ? null : "hidden-element";
+    string? CSSbackground = null;
+    string? taskColor = null;
+    string? classPin = null;
+    string? classPointer = null;
+    string borderStyle = "";
+}
+
+<div class="daily-calendar" style="@Style">
+    <div class="day-column" style="grid-column-start: 1">
+        @{
+            var day = Date.AddDays(0);
+            CSSbackground = GetBackground(Date);
+        }
+        <div class="day-header header-name noselect" style="@HeaderStyle @CSSbackground">
+            @Date.DayOfWeek.ToString() @Date.ToString("dd.MM")
+        </div>
+
+        <div class="hours">
+
+            
+            @for (int hour = 0; hour < 24; hour++)
+            {
+                DateTime hours = day.AddHours( hour );
+
+                <div class="hour day-cellule noselect cursor-pointer"
+                    ondragover="event.preventDefault();this.style.fontWeight='600';"
+                    ondragleave="this.style.fontWeight='100';"
+                    @ondrop:preventDefault="true"
+                    @ondrop="() => HandleDayOnDrop(hours)"
+                    @onclick="e => ClickDayInternal(e, hours)">
+                        @hours.ToString("HH:mm")
+                </div>
+
+                @if (TasksList is not null)
+                {
+                    int column = 1;
+                    var taskDetected = false;
+
+                    for (var k = 0; k < TasksList.Length; k++)
+                    {
+                        Tasks t = TasksList[k];
+
+
+                        if (t.DateEnd > hours && t.DateStart <= hours)
+                        {
+                            column++;
+
+                            taskColor = BlazorCalendar.Styles.Colors.GetHatching( t.FillStyle, t.Color );
+                            taskColor = $"{taskColor};color:{t.ForeColor}";
+
+                            classPin = string.IsNullOrWhiteSpace( t.Comment ) ? null : " pin";
+                            classPointer = " cursor-pointer";
+
+                            <div class="@($"hour-task {classPin}{classPointer} border-top border-bottom")"
+                                 style="grid-column-start: @column; @taskColor"
+                                 draggable="@Draggable.ToString()"
+                            @ondragstart="() => HandleDragStart(t.ID)"
+                            @onclick="e => ClickTaskInternal(e, t.ID, hours)">
+                                @t.Code
+                            </div>
+
+                            taskDetected = true;
+                        }
+                    }
+
+                    if(!taskDetected)
+                    {
+                        <div class="hour-notask day-cellule noselect cursor-pointer"
+                             ondragover="event.preventDefault();this.style.fontWeight='600';"
+                             ondragleave="this.style.fontWeight='100';"
+                             @ondrop:preventDefault="true"
+                             @ondrop="() => HandleDayOnDrop(hours)"
+                             @onclick="e => ClickDayInternal(e, hours)">
+                        </div>                        
+                    }
+                }
+            }
+        </div>
+
+    </div>
+</div>
+
+@code {
+}

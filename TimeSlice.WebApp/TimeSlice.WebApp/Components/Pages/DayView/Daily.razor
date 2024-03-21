@@ -1,0 +1,143 @@
+﻿@inject IDialogService DialogService
+@page "/daily"
+@using BlazorCalendar
+@using BlazorCalendar.Models
+
+<h1>Daily</h1>
+
+<div>
+	<CalendarContainer FirstDate="today" TasksList="TasksList.ToArray()" DisplayedView="DisplayedView.Weekly">
+		<DayView OutsideCurrentMonthClick="OutsideCurrentMonthClick"
+				 TaskClick="TaskClick"
+				 DayClick="DayClick"
+				 Draggable="true"
+				 DragStart="DragStart"
+				 DropTask="DropTask" />
+	</CalendarContainer>
+</div>
+
+@code {
+	private DateTime today = DateTime.Today;
+	private List<Tasks> TasksList = new List<Tasks>();
+	private string fakeConsole = "hello";
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+
+		TasksList = new()
+		{
+			new Tasks { ID = 0, DateStart = today.AddDays(0), DateEnd = today.AddHours(2), Code = "HELLO", Color = "#FFD800", Caption = "Lorem ipsum dolor sit amet", FillStyle = FillStyleEnum.BackwardDiagonal },
+			new Tasks { ID = 1, DateStart = today.AddDays(4).AddHours(8), DateEnd = today.AddDays(4).AddHours(11), Code = "😉 CP", Color = "#19C319", Caption = "Lorem ipsum dolor sit amet" } ,
+			new Tasks { ID = 2, DateStart = today.AddDays(-2).AddHours(8), DateEnd = today.AddDays(-2).AddHours(20), Code = "POD", Color = "#844fe7", Caption = "Podcast DevApps", FillStyle = FillStyleEnum.ZigZag } ,
+			// new Tasks { ID = 3, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "CALL", Color = "#eb3c37", ForeColor = "#222", Caption = "Lorem ipsum dolor sit amet", FillStyle=FillStyleEnum.CrossDots },
+			// new Tasks { ID = 4, DateStart = today.AddDays(31), DateEnd = today.AddDays(31), Code = "MTG", Color = "#19C319", Caption = "MTG:France" },
+			// new Tasks { ID = 5, DateStart = today.AddDays(40), DateEnd = today.AddDays(42), Code = "DEV", Color = "#FFD800", Comment="on Teams template", Caption = "Fusce quis purus eu ante" },
+			// new Tasks { ID = 6, DateStart = today.AddDays(32), DateEnd = today.AddDays(33), Code = "MEET", Color = "#0d6efd" },
+			// new Tasks { ID = 7, DateStart = today.AddDays(32), DateEnd = today.AddDays(32), Code = "BLAZOR", Color = "#FFC3FF", Caption = "Blazor Dev" } ,
+			// new Tasks { ID = 8, DateStart = today.AddDays(45).AddHours(8), DateEnd = today.AddDays(45).AddHours(9), Code = "MEETING", Color = "#2DD7D7", Comment="Julien's test" },
+			// new Tasks { ID = 9, DateStart = today.AddDays(-8), DateEnd = today.AddDays(-7), Code = "MEET⭐", Color = "#0d6efd",Caption = "MTG:France" }
+		};
+	}
+
+	private void OutsideCurrentMonthClick( int MonthAdded )
+	{
+		today = today.AddMonths( MonthAdded );
+	}
+
+	private async void TaskClick( ClickTaskParameter clickTaskParameter )
+	{
+		fakeConsole = "ID task(s) :" + string.Join( ", ", clickTaskParameter.IDList );
+
+
+		var taskClicked = TasksList.FirstOrDefault( t => t.ID == clickTaskParameter.IDList.FirstOrDefault() );
+
+		var options = new DialogOptions { CloseOnEscapeKey = true };
+		DialogService.Show<DialogTimeboxEntry>(GetDateName(clickTaskParameter.Day), options);
+
+		// modal.Set(
+		// 	clickTaskParameter.Day,
+		// 	clickTaskParameter.Day.AddHours( 1 ),
+		// 	GetDateName( clickTaskParameter.Day ),
+		// 	taskClicked.Code,
+		// 	clickTaskParameter.IDList.FirstOrDefault() );
+
+		OnShowModalClick();
+
+		await Task.CompletedTask;
+	}
+
+
+	private async void DayClick( ClickEmptyDayParameter clickEmptyDayParameter )
+	{
+		fakeConsole = $"Empty day :{GetDateName( clickEmptyDayParameter.Day )}";
+
+
+		var options = new DialogOptions { CloseOnEscapeKey = true };
+		DialogService.Show<DialogTimeboxEntry>( GetDateName( clickEmptyDayParameter.Day ), options );
+
+		// modal.Set(
+		// 	clickEmptyDayParameter.Day,
+		// 	clickEmptyDayParameter.Day.AddHours( 1 ),
+		// 	GetDateName( clickEmptyDayParameter.Day ),
+		// 	string.Empty );
+
+		OnShowModalClick();
+
+		await Refresh();
+	}
+
+	private void DragStart( DragDropParameter dragDropParameter )
+	{
+		fakeConsole = $"DragStart event : {dragDropParameter.taskID}";
+	}
+
+	private async void DropTask( DragDropParameter dragDropParameter )
+	{
+		fakeConsole = $"DropTask event :{dragDropParameter.Day.ToShortDateString()} {dragDropParameter.taskID}";
+
+		Tasks taskDropped = TasksList.FirstOrDefault( t => t.ID == dragDropParameter.taskID );
+
+		if (taskDropped == null)
+		{
+			return;
+		}
+
+		var TotalDay = (taskDropped.DateEnd - taskDropped.DateStart).TotalDays;
+		taskDropped.DateEnd = dragDropParameter.Day.AddDays( TotalDay );
+		taskDropped.DateStart = dragDropParameter.Day;
+
+		// await _timeboxService.Update( taskDropped.ID, taskDropped );
+
+		await Refresh();
+	}
+
+	private async Task Refresh()
+	{
+		await Task.CompletedTask;
+	}
+
+	private async void OnShowModalClick()
+	{
+		await Task.CompletedTask;
+		// await modal.Show();
+	}
+
+	private async void SaveClick( bool success )
+	{
+		await Task.CompletedTask;
+		// await Refresh();
+	}
+
+	private async void DeleteClick( bool success )
+	{
+		await Task.CompletedTask;
+		// await Refresh();
+	}
+
+	private string GetDateName( DateTime dateTime )
+	{
+		return $"{dateTime.ToShortDateString()} {dateTime.ToShortTimeString()}";
+	}
+
+}

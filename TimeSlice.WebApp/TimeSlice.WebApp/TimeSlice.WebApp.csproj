@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\TimeSlice.ServiceDefaults\TimeSlice.ServiceDefaults.csproj" />
     <ProjectReference Include="..\TimeSlice.WebApp.Client\TimeSlice.WebApp.Client.csproj" />
+    <PackageReference Include="BlazorCalendar" Version="2.6.7" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
     <PackageReference Include="MudBlazor" Version="6.17.0" />
