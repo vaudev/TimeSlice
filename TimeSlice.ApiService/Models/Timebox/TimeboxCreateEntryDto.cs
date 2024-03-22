@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TimeSlice.ApiService.Data
+namespace TimeSlice.ApiService.Models.Timebox
 {
-    public class TimeboxEntry
+    public class TimeboxEntryDto : BaseDto
     {
-        public int Id { get; set; }
-
         [Required]
         public string Code { get; set; } = string.Empty;
 

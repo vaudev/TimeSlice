@@ -2,9 +2,15 @@
 
 namespace TimeSlice.ApiService.Models.Timebox
 {
-    public class TimeboxEntryDto : BaseDto
+    public class TimeboxCreateEntryDto
     {
         [Required]
-        public string Caption { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+
+        [Required]
+        public DateTime DateStart { get; set; }
+
+        [Required]
+        public DateTime DateEnd { get; set; }
     }
 }

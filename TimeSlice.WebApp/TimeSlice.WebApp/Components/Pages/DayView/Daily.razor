@@ -1,7 +1,10 @@
-﻿@inject IDialogService DialogService
+﻿@inject IDialogService _dialogService
+@inject ITimeboxService _timeboxService
 @page "/daily"
 @using BlazorCalendar
 @using BlazorCalendar.Models
+@using TimeSlice.WebApp.Services.Base
+@using TimeSlice.WebApp.Services.Timebox
 
 <h1>Daily</h1>
 
@@ -20,24 +23,66 @@
 	private DateTime today = DateTime.Today;
 	private List<Tasks> TasksList = new List<Tasks>();
 	private string fakeConsole = "hello";
+	private List<TimeboxEntryDto> Entries;
 
-	protected override void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
-		base.OnInitialized();
+		await Refresh();
 
-		TasksList = new()
+		// TasksList = new()
+		// {
+		// 	new Tasks { ID = 0, DateStart = today.AddDays(0), DateEnd = today.AddHours(4), Code = "HELLO", Color = "#FFD800", Caption = "Lorem ipsum dolor sit amet", FillStyle = FillStyleEnum.BackwardDiagonal },
+		// 	new Tasks { ID = 1, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "IT'S ME", Color = "#FFD800", Caption = "Wayne", FillStyle = FillStyleEnum.BackwardDiagonal },
+		// 	// new Tasks { ID = 1, DateStart = today.AddDays(4).AddHours(8), DateEnd = today.AddDays(4).AddHours(11), Code = "😉 CP", Color = "#19C319", Caption = "Lorem ipsum dolor sit amet" } ,
+		// 	// new Tasks { ID = 2, DateStart = today.AddDays(-2).AddHours(8), DateEnd = today.AddDays(-2).AddHours(20), Code = "POD", Color = "#844fe7", Caption = "Podcast DevApps", FillStyle = FillStyleEnum.ZigZag } ,
+		// 	// new Tasks { ID = 3, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "CALL", Color = "#eb3c37", ForeColor = "#222", Caption = "Lorem ipsum dolor sit amet", FillStyle=FillStyleEnum.CrossDots },
+		// 	// new Tasks { ID = 4, DateStart = today.AddDays(31), DateEnd = today.AddDays(31), Code = "MTG", Color = "#19C319", Caption = "MTG:France" },
+		// 	// new Tasks { ID = 5, DateStart = today.AddDays(40), DateEnd = today.AddDays(42), Code = "DEV", Color = "#FFD800", Comment="on Teams template", Caption = "Fusce quis purus eu ante" },
+		// 	// new Tasks { ID = 6, DateStart = today.AddDays(32), DateEnd = today.AddDays(33), Code = "MEET", Color = "#0d6efd" },
+		// 	// new Tasks { ID = 7, DateStart = today.AddDays(32), DateEnd = today.AddDays(32), Code = "BLAZOR", Color = "#FFC3FF", Caption = "Blazor Dev" } ,
+		// 	// new Tasks { ID = 8, DateStart = today.AddDays(45).AddHours(8), DateEnd = today.AddDays(45).AddHours(9), Code = "MEETING", Color = "#2DD7D7", Comment="Julien's test" },
+		// 	// new Tasks { ID = 9, DateStart = today.AddDays(-8), DateEnd = today.AddDays(-7), Code = "MEET⭐", Color = "#0d6efd",Caption = "MTG:France" }
+		// };
+
+		// var result = _timeboxService.GetAll();
+
+		// return base.OnInitializedAsync();
+	}
+
+	private async Task Refresh()
+	{
+		var response = await _timeboxService.GetAll();
+
+		if( response.Success )
 		{
-			new Tasks { ID = 0, DateStart = today.AddDays(0), DateEnd = today.AddHours(2), Code = "HELLO", Color = "#FFD800", Caption = "Lorem ipsum dolor sit amet", FillStyle = FillStyleEnum.BackwardDiagonal },
-			new Tasks { ID = 1, DateStart = today.AddDays(4).AddHours(8), DateEnd = today.AddDays(4).AddHours(11), Code = "😉 CP", Color = "#19C319", Caption = "Lorem ipsum dolor sit amet" } ,
-			new Tasks { ID = 2, DateStart = today.AddDays(-2).AddHours(8), DateEnd = today.AddDays(-2).AddHours(20), Code = "POD", Color = "#844fe7", Caption = "Podcast DevApps", FillStyle = FillStyleEnum.ZigZag } ,
-			// new Tasks { ID = 3, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "CALL", Color = "#eb3c37", ForeColor = "#222", Caption = "Lorem ipsum dolor sit amet", FillStyle=FillStyleEnum.CrossDots },
-			// new Tasks { ID = 4, DateStart = today.AddDays(31), DateEnd = today.AddDays(31), Code = "MTG", Color = "#19C319", Caption = "MTG:France" },
-			// new Tasks { ID = 5, DateStart = today.AddDays(40), DateEnd = today.AddDays(42), Code = "DEV", Color = "#FFD800", Comment="on Teams template", Caption = "Fusce quis purus eu ante" },
-			// new Tasks { ID = 6, DateStart = today.AddDays(32), DateEnd = today.AddDays(33), Code = "MEET", Color = "#0d6efd" },
-			// new Tasks { ID = 7, DateStart = today.AddDays(32), DateEnd = today.AddDays(32), Code = "BLAZOR", Color = "#FFC3FF", Caption = "Blazor Dev" } ,
-			// new Tasks { ID = 8, DateStart = today.AddDays(45).AddHours(8), DateEnd = today.AddDays(45).AddHours(9), Code = "MEETING", Color = "#2DD7D7", Comment="Julien's test" },
-			// new Tasks { ID = 9, DateStart = today.AddDays(-8), DateEnd = today.AddDays(-7), Code = "MEET⭐", Color = "#0d6efd",Caption = "MTG:France" }
-		};
+			Entries = response.Data;
+		}
+
+		TasksList.Clear();
+		foreach (var entry in Entries)
+		{
+			var newTask = new Tasks()
+				{
+					ID = entry.Id,
+					DateStart = ConvertFromDateTimeOffset( entry.DateStart ),
+					DateEnd = ConvertFromDateTimeOffset( entry.DateEnd ),
+					Code = entry.Code
+				};
+
+			TasksList.Add( newTask );
+		}
+
+		StateHasChanged();
+	}
+
+	private DateTime ConvertFromDateTimeOffset( DateTimeOffset dateTime )
+	{
+		if (dateTime.Offset.Equals( TimeSpan.Zero ))
+			return dateTime.UtcDateTime;
+		else if (dateTime.Offset.Equals( TimeZoneInfo.Local.GetUtcOffset( dateTime.DateTime ) ))
+			return DateTime.SpecifyKind( dateTime.DateTime, DateTimeKind.Local );
+		else
+			return dateTime.DateTime;
 	}
 
 	private void OutsideCurrentMonthClick( int MonthAdded )
@@ -52,19 +97,11 @@
 
 		var taskClicked = TasksList.FirstOrDefault( t => t.ID == clickTaskParameter.IDList.FirstOrDefault() );
 
+		var parameters = new DialogParameters<DialogTimeboxEntry>() { { x => x.Task, taskClicked } };
 		var options = new DialogOptions { CloseOnEscapeKey = true };
-		DialogService.Show<DialogTimeboxEntry>(GetDateName(clickTaskParameter.Day), options);
-
-		// modal.Set(
-		// 	clickTaskParameter.Day,
-		// 	clickTaskParameter.Day.AddHours( 1 ),
-		// 	GetDateName( clickTaskParameter.Day ),
-		// 	taskClicked.Code,
-		// 	clickTaskParameter.IDList.FirstOrDefault() );
-
-		OnShowModalClick();
-
-		await Task.CompletedTask;
+		var dialog = await _dialogService.ShowAsync<DialogTimeboxEntry>(GetDateName(clickTaskParameter.Day), parameters, options);
+		var result = await dialog.Result;
+		OnTasksUpdated( !result.Canceled );
 	}
 
 
@@ -72,19 +109,18 @@
 	{
 		fakeConsole = $"Empty day :{GetDateName( clickEmptyDayParameter.Day )}";
 
+		var fakeTask = new Tasks
+			{
+				ID = -1,
+				DateStart = clickEmptyDayParameter.Day,
+				DateEnd = clickEmptyDayParameter.Day.AddHours( 1 )
+			};
 
+		var parameters = new DialogParameters<DialogTimeboxEntry>() { { x => x.Task, fakeTask } };
 		var options = new DialogOptions { CloseOnEscapeKey = true };
-		DialogService.Show<DialogTimeboxEntry>( GetDateName( clickEmptyDayParameter.Day ), options );
-
-		// modal.Set(
-		// 	clickEmptyDayParameter.Day,
-		// 	clickEmptyDayParameter.Day.AddHours( 1 ),
-		// 	GetDateName( clickEmptyDayParameter.Day ),
-		// 	string.Empty );
-
-		OnShowModalClick();
-
-		await Refresh();
+		var dialog = await _dialogService.ShowAsync<DialogTimeboxEntry>( GetDateName( clickEmptyDayParameter.Day ), parameters, options );
+		var result = await dialog.Result;
+		OnTasksUpdated( !result.Canceled );
 	}
 
 	private void DragStart( DragDropParameter dragDropParameter )
@@ -112,27 +148,12 @@
 		await Refresh();
 	}
 
-	private async Task Refresh()
+	private async void OnTasksUpdated( bool success )
 	{
-		await Task.CompletedTask;
-	}
-
-	private async void OnShowModalClick()
-	{
-		await Task.CompletedTask;
-		// await modal.Show();
-	}
-
-	private async void SaveClick( bool success )
-	{
-		await Task.CompletedTask;
-		// await Refresh();
-	}
-
-	private async void DeleteClick( bool success )
-	{
-		await Task.CompletedTask;
-		// await Refresh();
+		if( success )
+		{
+            await Refresh();
+        }
 	}
 
 	private string GetDateName( DateTime dateTime )

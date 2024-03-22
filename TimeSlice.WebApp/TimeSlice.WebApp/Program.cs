@@ -5,6 +5,7 @@ using TimeSlice.WebApp.Components;
 using TimeSlice.WebApp.Providers;
 using TimeSlice.WebApp.Services.Auth;
 using TimeSlice.WebApp.Services.Base;
+using TimeSlice.WebApp.Services.Timebox;
 
 var builder = WebApplication.CreateBuilder( args );
 
@@ -24,6 +25,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddMudServices();
+
+builder.Services.AddScoped<ITimeboxService, TimeboxService>();
 
 var app = builder.Build();
 

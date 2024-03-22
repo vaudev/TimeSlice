@@ -1,6 +1,12 @@
-﻿<MudDialog>
+﻿@inject ITimeboxService _timeboxService
+@using BlazorCalendar.Models
+@using TimeSlice.WebApp.Services.Base
+@using TimeSlice.WebApp.Services.Timebox
+<MudDialog>
+    <TitleContent>
+    </TitleContent>
     <DialogContent>
-        Dialog Content
+        <MudInput Label="Caption" @bind-Value="Task.Code" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -8,8 +14,40 @@
     </DialogActions>
 </MudDialog>
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] 
+    MudDialogInstance MudDialog { get; set; }
 
-    void Submit() => MudDialog.Close( DialogResult.Ok( true ) );
+    [Parameter] 
+    public Tasks Task { get; set; } = new Tasks();
+
+    private async void Submit()
+    {
+        var createDto = new TimeboxEntryDto()
+            {
+                Id = -1,
+                Code = Task.Code,
+                DateStart = Task.DateStart,
+                DateEnd = Task.DateEnd
+            };
+
+        Response<int> response;
+
+        if (IsCreateNew())
+        {
+            response = await _timeboxService.Create( createDto );
+        }
+        else
+        {
+            response = await _timeboxService.Update( Task.ID, createDto );
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private bool IsCreateNew()
+    {
+        return Task.ID == -1;
+    }
+
     void Cancel() => MudDialog.Cancel();
 }

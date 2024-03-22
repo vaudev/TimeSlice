@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TimeSlice.ApiService.Configurations;
 using TimeSlice.ApiService.Data;
+using TimeSlice.ApiService.Repositories.Timebox;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,9 @@ builder.Services.AddIdentityCore<ApplicationUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+
+builder.Services.AddScoped<ITimeboxRepository, TimeboxRepository>();
 
 
 

@@ -64,8 +64,8 @@
                             <div class="@($"hour-task {classPin}{classPointer} border-top border-bottom mouseover-effect")"
                                  style="grid-column-start: @column; @taskColor"
                                  draggable="@Draggable.ToString()"
-                            @ondragstart="() => HandleDragStart(t.ID)"
-                            @onclick="e => ClickTaskInternal(e, t.ID, hours)">
+                                 @ondragstart="() => HandleDragStart(t.ID)"
+                                 @onclick="e => ClickTaskInternal(e, t.ID, hours)">
                                 @t.Code
                             </div>
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using TimeSlice.ApiService.Data;
 using TimeSlice.ApiService.Models.Auth;
 using TimeSlice.ApiService.Models.Timebox;
 
@@ -8,8 +9,10 @@ namespace TimeSlice.ApiService.Configurations
     {
         public MapperConfig()
         {
-            CreateMap<Data.ApplicationUser, ApplicationUserDto>().ReverseMap();
-            CreateMap<Data.TimeboxEntry, TimeboxEntryDto>().ReverseMap();
-        }
+            CreateMap<ApplicationUser, ApplicationUserDto>().ReverseMap();
+			CreateMap<TimeboxEntry, TimeboxEntryDto>().ReverseMap();
+			CreateMap<TimeboxEntry, TimeboxCreateEntryDto>().ReverseMap();
+			CreateMap<TimeboxEntryDto, TimeboxCreateEntryDto>().ReverseMap();
+		}
     }
 }
