@@ -10,6 +10,7 @@ namespace TimeSlice.WebApp.Providers
     {
         private readonly ILocalStorageService _tokenStorage;
         private readonly JwtSecurityTokenHandler _tokenHandler;
+        private ClaimsPrincipal? _user = null;
 
         public ApiAuthenticationStateProvider( ILocalStorageService tokenStorage )
         {
@@ -17,43 +18,54 @@ namespace TimeSlice.WebApp.Providers
             _tokenHandler = new JwtSecurityTokenHandler();
         }
 
+        public string GetOwnerId()
+        {
+            if( _user == null )
+            {
+                return string.Empty;
+            }
+
+            var uidClaim = _user.Claims.FirstOrDefault( c => c.Type == "uid" );
+            return uidClaim?.Value ?? string.Empty;
+        }
+
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var user = new ClaimsPrincipal( new ClaimsIdentity() );
+            _user = new ClaimsPrincipal( new ClaimsIdentity() );
 
             var tokenString = await _tokenStorage.GetItemAsync<string>( Keys.AccessToken );
             if (tokenString == null)
             {
-                return new AuthenticationState( user );
+                return new AuthenticationState( _user );
             }
 
             var jwtToken = _tokenHandler.ReadJwtToken( tokenString );
             if (jwtToken.ValidTo < DateTime.UtcNow)
             {
-                return new AuthenticationState( user );
+                return new AuthenticationState( _user );
             }
 
             var claims = await GetClaims();
 
-            user = new ClaimsPrincipal( new ClaimsIdentity( claims, "jwt" ) );
+            _user = new ClaimsPrincipal( new ClaimsIdentity( claims, "jwt" ) );
 
-            return new AuthenticationState( user );
+            return new AuthenticationState( _user );
         }
 
         public async Task LoggedInAsync( string token )
         {
             await _tokenStorage.SetItemAsync( Keys.AccessToken, token );
             var claims = await GetClaims();
-            var user = new ClaimsPrincipal( new ClaimsIdentity( claims, Keys.AuthType ) );
-            var authState = Task.FromResult( new AuthenticationState( user ) );
+            _user = new ClaimsPrincipal( new ClaimsIdentity( claims, Keys.AuthType ) );
+            var authState = Task.FromResult( new AuthenticationState( _user ) );
             NotifyAuthenticationStateChanged( authState );
         }
 
         public async Task LoggedOut()
         {
             await _tokenStorage.RemoveItemAsync( Keys.AccessToken );
-            var nobody = new ClaimsPrincipal( new ClaimsIdentity() );
-            var authState = Task.FromResult( new AuthenticationState( nobody ) );
+            _user = new ClaimsPrincipal( new ClaimsIdentity() );
+            var authState = Task.FromResult( new AuthenticationState( _user ) );
             NotifyAuthenticationStateChanged( authState );
         }
 

@@ -34,48 +34,48 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync();
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(string ownerId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(string ownerId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(TimeboxEntryDto body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(int id);
+        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(string ownerId, TimeboxEntryDto body);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(int id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(string ownerId, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TimeboxPUTAsync(int id, TimeboxEntryDto body);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TimeboxPUTAsync(int id, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>Success</returns>
-        /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TimeboxDELETEAsync(int id);
+        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(string ownerId, int id);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task TimeboxDELETEAsync(int id, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(string ownerId, int id, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TimeboxPUTAsync(string ownerId, int id, TimeboxEntryDto body);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TimeboxPUTAsync(string ownerId, int id, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TimeboxDELETEAsync(string ownerId, int id);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>Success</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task TimeboxDELETEAsync(string ownerId, int id, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -201,15 +201,15 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync()
+        public virtual System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(string ownerId)
         {
-            return TimeboxAllAsync(System.Threading.CancellationToken.None);
+            return TimeboxAllAsync(ownerId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.ICollection<TimeboxEntryDto>> TimeboxAllAsync(string ownerId, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -224,6 +224,12 @@ namespace TimeSlice.WebApp.Services.Base
                 
                     // Operation Path: "api/Timebox"
                     urlBuilder_.Append("api/Timebox");
+                    urlBuilder_.Append('?');
+                    if (ownerId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ownerId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(ownerId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -279,15 +285,15 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(TimeboxEntryDto body)
+        public virtual System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(string ownerId, TimeboxEntryDto body)
         {
-            return TimeboxPOSTAsync(body, System.Threading.CancellationToken.None);
+            return TimeboxPOSTAsync(ownerId, body, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxPOSTAsync(string ownerId, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -306,6 +312,12 @@ namespace TimeSlice.WebApp.Services.Base
                 
                     // Operation Path: "api/Timebox"
                     urlBuilder_.Append("api/Timebox");
+                    urlBuilder_.Append('?');
+                    if (ownerId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ownerId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(ownerId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -361,15 +373,15 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(int id)
+        public virtual System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(string ownerId, int id)
         {
-            return TimeboxGETAsync(id, System.Threading.CancellationToken.None);
+            return TimeboxGETAsync(ownerId, id, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(int id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<TimeboxEntryDto> TimeboxGETAsync(string ownerId, int id, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -388,6 +400,12 @@ namespace TimeSlice.WebApp.Services.Base
                     // Operation Path: "api/Timebox/{id}"
                     urlBuilder_.Append("api/Timebox/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (ownerId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ownerId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(ownerId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -443,15 +461,15 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task TimeboxPUTAsync(int id, TimeboxEntryDto body)
+        public virtual System.Threading.Tasks.Task TimeboxPUTAsync(string ownerId, int id, TimeboxEntryDto body)
         {
-            return TimeboxPUTAsync(id, body, System.Threading.CancellationToken.None);
+            return TimeboxPUTAsync(ownerId, id, body, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task TimeboxPUTAsync(int id, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task TimeboxPUTAsync(string ownerId, int id, TimeboxEntryDto body, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -473,6 +491,12 @@ namespace TimeSlice.WebApp.Services.Base
                     // Operation Path: "api/Timebox/{id}"
                     urlBuilder_.Append("api/Timebox/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (ownerId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ownerId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(ownerId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -523,15 +547,15 @@ namespace TimeSlice.WebApp.Services.Base
 
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task TimeboxDELETEAsync(int id)
+        public virtual System.Threading.Tasks.Task TimeboxDELETEAsync(string ownerId, int id)
         {
-            return TimeboxDELETEAsync(id, System.Threading.CancellationToken.None);
+            return TimeboxDELETEAsync(ownerId, id, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>Success</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task TimeboxDELETEAsync(int id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task TimeboxDELETEAsync(string ownerId, int id, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -549,6 +573,12 @@ namespace TimeSlice.WebApp.Services.Base
                     // Operation Path: "api/Timebox/{id}"
                     urlBuilder_.Append("api/Timebox/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (ownerId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ownerId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(ownerId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -792,6 +822,9 @@ namespace TimeSlice.WebApp.Services.Base
     {
         [Newtonsoft.Json.JsonProperty("userName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string UserName { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string Id { get; set; }
 
     }
 

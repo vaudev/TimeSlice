@@ -28,11 +28,11 @@ namespace TimeSlice.ApiService.Controllers
 
         // GET: api/Timebox
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TimeboxEntryDto>>> Get()
+        public async Task<ActionResult<IEnumerable<TimeboxEntryDto>>> Get( string ownerId )
         {
             try
             {
-                var entries = await _repository.GetAllAsync();
+                var entries = await _repository.GetAllAsync(ownerId);
                 return Ok( _mapper.Map<IEnumerable<TimeboxEntryDto>>( entries ) );
             }
             catch (Exception ex)
@@ -44,11 +44,11 @@ namespace TimeSlice.ApiService.Controllers
 
         // GET: api/Timebox/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TimeboxEntryDto>> Get(int id)
+        public async Task<ActionResult<TimeboxEntryDto>> Get( string ownerId, int id)
         {
             try
             {
-                var entry = await _repository.GetAsync( id );
+                var entry = await _repository.GetAsync(ownerId, id );
                 if( entry == null )
                 {
                     return NotFound();
@@ -66,7 +66,7 @@ namespace TimeSlice.ApiService.Controllers
         // PUT: api/Timebox/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, TimeboxEntryDto dto)
+        public async Task<IActionResult> Put( string ownerId, int id, TimeboxEntryDto dto)
         {
             if (id != dto.Id)
             {
@@ -74,7 +74,7 @@ namespace TimeSlice.ApiService.Controllers
                 return BadRequest();
             }
 
-            var author = await _repository.GetAsync( id );
+            var author = await _repository.GetAsync(ownerId, id );
 
             if (author == null)
             {
@@ -86,11 +86,11 @@ namespace TimeSlice.ApiService.Controllers
 
             try
             {
-                await _repository.UpdateAsync( author );
+                await _repository.UpdateAsync(ownerId, author );
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                if (await _repository.Exists( id ) == false)
+                if (await _repository.Exists(ownerId, id ) == false)
                 {
                     return NotFound();
                 }
@@ -107,13 +107,14 @@ namespace TimeSlice.ApiService.Controllers
         // POST: api/Timebox
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TimeboxEntryDto>> Post( TimeboxEntryDto dto )
+        public async Task<ActionResult<TimeboxEntryDto>> Post( string ownerId, TimeboxEntryDto dto )
         {
             try
             {
                 var create = _mapper.Map<TimeboxCreateEntryDto>( dto );
                 var data = _mapper.Map<TimeboxEntry>( create );
-                await _repository.AddAsync( data );
+                data.OwnerId = ownerId;
+                await _repository.AddAsync( ownerId, data );
                 return CreatedAtAction( nameof( Post ), new { id = data.Id }, data );
             }
             catch (Exception ex)
@@ -125,11 +126,11 @@ namespace TimeSlice.ApiService.Controllers
 
         // DELETE: api/Timebox/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete( string ownerId, int id)
         {
             try
             {
-                await _repository.DeleteAsync( id );
+                await _repository.DeleteAsync( ownerId, id );
                 return NoContent();
             }
             catch (Exception ex)

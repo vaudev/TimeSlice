@@ -4,5 +4,6 @@
     {
         Task<bool> RegisterOrLogin( string userName );
         Task Logout();
+        string GetOwnerId();
     }
 }

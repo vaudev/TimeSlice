@@ -6,5 +6,4 @@ namespace TimeSlice.ApiService.Data
     public class ApplicationUser : IdentityUser
     {
     }
-
 }

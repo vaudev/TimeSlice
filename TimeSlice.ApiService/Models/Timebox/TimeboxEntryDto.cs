@@ -12,5 +12,8 @@ namespace TimeSlice.ApiService.Models.Timebox
 
         [Required]
         public DateTime DateEnd { get; set; }
+
+        [Required]
+        public string OwnerId { get; set; }
     }
 }

@@ -2,10 +2,8 @@
 
 namespace TimeSlice.ApiService.Data
 {
-    public class TimeboxEntry
+    public class TimeboxEntry : OwnerData
     {
-        public int Id { get; set; }
-
         [Required]
         public string Code { get; set; } = string.Empty;
 
