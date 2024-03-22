@@ -10,6 +10,10 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
+        @if(Task.ID != -1 )
+        {
+            <MudButton Color="Color.Error" OnClick="Delete">Delete</MudButton>            
+        }        
         <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
     </DialogActions>
 </MudDialog>
@@ -19,6 +23,8 @@
 
     [Parameter] 
     public Tasks Task { get; set; } = new Tasks();
+    
+    void Cancel() => MudDialog.Cancel();
 
     private async void Submit()
     {
@@ -49,5 +55,14 @@
         return Task.ID == -1;
     }
 
-    void Cancel() => MudDialog.Cancel();
+    public async Task Delete()
+    {
+        if (Task.ID == -1)
+        {
+            return;
+        }
+
+        var response = await _timeboxService.Delete( Task.ID );
+        MudDialog.Close( DialogResult.Ok( true ) );
+    }
 }
