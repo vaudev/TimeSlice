@@ -1,0 +1,47 @@
+﻿@page "/login"
+
+@using Microsoft.AspNetCore.Components.Forms
+@using TimeSlice.WebApp.Services.Auth
+@using TimeSlice.WebApp.Services.Base
+
+@inject IAuthenticationService _authService
+@inject NavigationManager _navigationManager
+
+<PageTitle>Login</PageTitle>
+
+<MudGrid>
+     <MudItem>
+        <EditForm Model="userModel" OnSubmit="@SubmitForm" FormName="usernameForm">
+            <DataAnnotationsValidator />
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Username" id="username" @bind-Value="userModel.Username" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
+    </MudItem> 
+</MudGrid>
+
+@code {
+
+    [SupplyParameterFromForm]
+    private UserModel userModel { get; set; } = new();
+
+    private async Task SubmitForm()
+    {
+        var isSuccess = await _authService.RegisterOrLogin(userModel.Username);
+
+        if (isSuccess)
+        {
+            _navigationManager.NavigateTo( "/daily" );
+        }
+    }
+
+    public class UserModel
+    {
+        public string Username { get; set; }
+    }
+}

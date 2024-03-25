@@ -1,57 +1,13 @@
 ﻿@page "/"
-
-@using Microsoft.AspNetCore.Components.Forms
-@using TimeSlice.WebApp.Services.Auth
-@using TimeSlice.WebApp.Services.Base
-
-@inject IAuthenticationService _authService
-@inject NavigationManager _navigationManager
+@inject NavigationManager _navManager
 
 <PageTitle>Home</PageTitle>
-
-@* <MudContainer Class="d-flex justify-content-center align-items-center" Style="height: 100vh;"> *@
-<MudGrid>
-@*     <MudItem>
-        <MudButton>Test</MudButton>
-    </MudItem>
-    <MudItem>
-        <MudButton Color="Color.Secondary">Test</MudButton>
-    </MudItem>
-    <MudItem>
-        <MudButton>Test</MudButton>
-    </MudItem> *@
-     <MudItem>
-        <EditForm Model="userModel" OnSubmit="@SubmitForm" FormName="usernameForm">
-            <DataAnnotationsValidator />
-            <MudCard>
-                <MudCardContent>
-                    <MudTextField Label="Username" id="username" @bind-Value="userModel.Username" />
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
-                </MudCardActions>
-            </MudCard>
-        </EditForm>
-    </MudItem> 
-</MudGrid>
-
-@code {
-
-    [SupplyParameterFromForm]
-    private UserModel userModel { get; set; } = new();
-
-    private async Task SubmitForm()
-    {
-        var isSuccess = await _authService.RegisterOrLogin(userModel.Username);
-
-        if (isSuccess)
-        {
-            _navigationManager.NavigateTo( "/weather" );
-        }
-    }
-
-    public class UserModel
-    {
-        public string Username { get; set; }
-    }
-}
+@* 
+<AuthorizeView>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+    <Authorized>
+        <RedirectToDaily />
+    </Authorized>
+</AuthorizeView> *@
