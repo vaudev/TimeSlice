@@ -5,21 +5,30 @@
 @using BlazorCalendar.Models
 @using TimeSlice.WebApp.Services.Base
 @using TimeSlice.WebApp.Services.Timebox
+@attribute [StreamRendering]
 
 <h1>Daily</h1>
 
-<div>
-	<CalendarContainer FirstDate="today" TasksList="TasksList.ToArray()" DisplayedView="DisplayedView.Weekly">
-		<DayView OutsideCurrentMonthClick="OutsideCurrentMonthClick"
-				 TaskClick="TaskClick"
-				 DayClick="DayClick"
-				 Draggable="true"
-				 DragStart="DragStart"
-				 DropTask="DropTask" />
-	</CalendarContainer>
-</div>
+@if(isLoading)
+{
+	<p><em>Loading...</em></p>	
+}
+else
+{
+	<div>
+		<CalendarContainer FirstDate="today" TasksList="TasksList.ToArray()" DisplayedView="DisplayedView.Weekly">
+			<DayView OutsideCurrentMonthClick="OutsideCurrentMonthClick"
+					 TaskClick="TaskClick"
+					 DayClick="DayClick"
+					 Draggable="true"
+					 DragStart="DragStart"
+					 DropTask="DropTask" />
+		</CalendarContainer>
+	</div>	
+}
 
 @code {
+	private bool isLoading = true;
 	private DateTime today = DateTime.Today;
 	private List<Tasks> TasksList = new List<Tasks>();
 	private string fakeConsole = "hello";
@@ -28,25 +37,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		await Refresh();
-
-		// TasksList = new()
-		// {
-		// 	new Tasks { ID = 0, DateStart = today.AddDays(0), DateEnd = today.AddHours(4), Code = "HELLO", Color = "#FFD800", Caption = "Lorem ipsum dolor sit amet", FillStyle = FillStyleEnum.BackwardDiagonal },
-		// 	new Tasks { ID = 1, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "IT'S ME", Color = "#FFD800", Caption = "Wayne", FillStyle = FillStyleEnum.BackwardDiagonal },
-		// 	// new Tasks { ID = 1, DateStart = today.AddDays(4).AddHours(8), DateEnd = today.AddDays(4).AddHours(11), Code = "😉 CP", Color = "#19C319", Caption = "Lorem ipsum dolor sit amet" } ,
-		// 	// new Tasks { ID = 2, DateStart = today.AddDays(-2).AddHours(8), DateEnd = today.AddDays(-2).AddHours(20), Code = "POD", Color = "#844fe7", Caption = "Podcast DevApps", FillStyle = FillStyleEnum.ZigZag } ,
-		// 	// new Tasks { ID = 3, DateStart = today.AddHours(5), DateEnd = today.AddHours(10), Code = "CALL", Color = "#eb3c37", ForeColor = "#222", Caption = "Lorem ipsum dolor sit amet", FillStyle=FillStyleEnum.CrossDots },
-		// 	// new Tasks { ID = 4, DateStart = today.AddDays(31), DateEnd = today.AddDays(31), Code = "MTG", Color = "#19C319", Caption = "MTG:France" },
-		// 	// new Tasks { ID = 5, DateStart = today.AddDays(40), DateEnd = today.AddDays(42), Code = "DEV", Color = "#FFD800", Comment="on Teams template", Caption = "Fusce quis purus eu ante" },
-		// 	// new Tasks { ID = 6, DateStart = today.AddDays(32), DateEnd = today.AddDays(33), Code = "MEET", Color = "#0d6efd" },
-		// 	// new Tasks { ID = 7, DateStart = today.AddDays(32), DateEnd = today.AddDays(32), Code = "BLAZOR", Color = "#FFC3FF", Caption = "Blazor Dev" } ,
-		// 	// new Tasks { ID = 8, DateStart = today.AddDays(45).AddHours(8), DateEnd = today.AddDays(45).AddHours(9), Code = "MEETING", Color = "#2DD7D7", Comment="Julien's test" },
-		// 	// new Tasks { ID = 9, DateStart = today.AddDays(-8), DateEnd = today.AddDays(-7), Code = "MEET⭐", Color = "#0d6efd",Caption = "MTG:France" }
-		// };
-
-		// var result = _timeboxService.GetAll();
-
-		// return base.OnInitializedAsync();
+		isLoading = false;
 	}
 
 	private async Task Refresh()

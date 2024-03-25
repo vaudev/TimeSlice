@@ -1,0 +1,51 @@
+﻿@page "/statistics"
+@using TimeSlice.WebApp.Services.Base
+@using TimeSlice.WebApp.Services.Timebox
+@inject ITimeboxService _timeboxService
+
+<h1>Statistics</h1>
+
+<MudDataGrid @ref="_dataGrid" Items="_entries">
+    <Columns>
+        <PropertyColumn Property="x => x.Code" Title="Name" />
+        <PropertyColumn Property="x => x.Duration.TotalHours" Title="Duration in Hours" />
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<TimeboxUsageEntry> _entries = new List<TimeboxUsageEntry>();
+    private MudDataGrid<TimeboxUsageEntry> _dataGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _timeboxService.GetAll();
+        if (response.Success)
+        {
+            ReadTimeboxEntries( ref response.Data );
+        }
+
+        await _dataGrid.SetSortAsync( nameof( TimeboxUsageEntry.Duration ), SortDirection.Descending, x => x.Duration );
+    }
+
+    private void ReadTimeboxEntries(ref List<TimeboxEntryDto> entries)
+    {
+        var dictionary = new Dictionary<string, TimeSpan>();
+
+        foreach (var entry in entries)
+        {
+            var duration = entry.DateEnd - entry.DateStart;
+
+            if( dictionary.TryGetValue(entry.Code, out var existingDuration) )
+            {
+                dictionary[entry.Code] = existingDuration + duration;
+            }
+            else
+            {
+                dictionary.Add(entry.Code, duration);
+            };
+        }
+
+        _entries = dictionary.Select(x => new TimeboxUsageEntry { Code = x.Key, Duration = x.Value }).ToList();
+        _entries.OrderBy(x => x.Duration);
+    }
+}
