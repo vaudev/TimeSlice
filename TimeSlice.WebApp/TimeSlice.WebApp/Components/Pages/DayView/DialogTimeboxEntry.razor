@@ -4,13 +4,14 @@
 @using TimeSlice.WebApp.Services.Timebox
 <MudDialog>
     <TitleContent>
+        <MudText>@($"{Task.DateStart.ToString( "HH:mm" )} - {Task.DateEnd.ToString( "HH:mm" )}")</MudText>
     </TitleContent>
     <DialogContent>
-        <MudInput Label="Caption" @bind-Value="Task.Code" />
+        <MudInput AutoFocus=true Placeholder="Add caption" Label="Caption" @bind-Value="Task.Code" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        @if(Task.ID != -1 )
+        @if(Task.Id != -1 )
         {
             <MudButton Color="Color.Error" OnClick="Delete">Delete</MudButton>            
         }        
@@ -23,28 +24,20 @@
     MudDialogInstance MudDialog { get; set; }
 
     [Parameter] 
-    public Tasks Task { get; set; } = new Tasks();
+    public TimeboxEntryDto Task { get; set; } = new TimeboxEntryDto();
     void Cancel() => MudDialog.Cancel();
 
     private async void Submit()
     {
-        var createDto = new TimeboxEntryDto()
-            {
-                Id = -1,
-                Code = Task.Code,
-                DateStart = Task.DateStart,
-                DateEnd = Task.DateEnd
-            };
-
         Response<int> response;
 
         if (IsCreateNew())
         {
-            response = await _timeboxService.Create( createDto );
+            response = await _timeboxService.Create( Task );
         }
         else
         {
-            response = await _timeboxService.Update( Task.ID, createDto );
+            response = await _timeboxService.Update( Task.Id, Task );
         }
 
         MudDialog.Close(DialogResult.Ok(true));
@@ -52,17 +45,17 @@
 
     private bool IsCreateNew()
     {
-        return Task.ID == -1;
+        return Task.Id == -1;
     }
 
     public async Task Delete()
     {
-        if (Task.ID == -1)
+        if (Task.Id == -1)
         {
             return;
         }
 
-        var response = await _timeboxService.Delete( Task.ID );
+        var response = await _timeboxService.Delete( Task.Id );
         MudDialog.Close( DialogResult.Ok( true ) );
     }
 }
