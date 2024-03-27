@@ -15,24 +15,58 @@
 }
 else
 {
-	<div>
-		<CalendarContainer FirstDate="today" TasksList="TasksList.ToArray()" DisplayedView="DisplayedView.Weekly">
-			<DayView OutsideCurrentMonthClick="OutsideCurrentMonthClick"
-					 TaskClick="TaskClick"
-					 DayClick="DayClick"
-					 Draggable="true"
-					 DragStart="DragStart"
-					 DropTask="DropTask" />
-		</CalendarContainer>
-	</div>	
+	<MudDropContainer T="DropItem" Items="_dropItems" ItemsSelector="@((item,dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated" Class="d-flex flex-column flex-grow-1">
+		<ChildContent>
+			@{
+				var day = DateTime.Today;
+				for (int hour = 0; hour < 24; hour++)
+				{
+					var dropzone = hour.ToString();
+					DateTime hours = day.AddHours( hour );
+					var hasDropItem = _dropItems.Any( item => item.Selector == dropzone );
+
+					// MudList is necessary to make the DropZone clickable.
+					<MudList Clickable="true" Class="border d-flex flex-row pa-0">
+						<MudDropZone T="DropItem" Identifier="@dropzone" Class="d-flex d-row flex-grow-1">
+							<MudListItem OnClick="@(()=> OnHourClicked(dropzone))" Text="@hours.ToString("HH:mm")" Class="flew-grow-1" />
+						</MudDropZone>
+					</MudList>
+				}
+			}
+		</ChildContent>
+		<ItemRenderer>
+			<MudListItem Text="@context.Name" Style="white-space: nowrap;width: 200px;"OnClick="@(() => OnEntryClicked(context))" />
+		</ItemRenderer>
+	</MudDropContainer>
 }
 
 @code {
+	public class DropItem
+	{
+		public string Name { get; init; }
+		public string Selector { get; set; }
+	}
+
+
 	private bool isLoading = true;
+	private bool isFirstSort = true;
 	private DateTime today = DateTime.Today;
 	private List<Tasks> TasksList = new List<Tasks>();
 	private string fakeConsole = "hello";
-	private List<TimeboxEntryDto> Entries = new List<TimeboxEntryDto>();
+	private List<TimeboxEntryDto> _dtoEntries = new List<TimeboxEntryDto>();
+	private List<TimeboxUsageEntry> _usageEntries = new List<TimeboxUsageEntry>();
+	private MudDataGrid<TimeboxUsageEntry> _dataGrid;
+
+	private List<DropItem> _dropItems = new(){};
+
+	protected override async Task OnAfterRenderAsync( bool firstRender )
+	{
+		if (_dataGrid != null && isFirstSort)
+		{
+			await _dataGrid.SetSortAsync( nameof( TimeboxUsageEntry.Duration ), SortDirection.Descending, x => x.Duration );
+			isFirstSort = false;
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -42,15 +76,16 @@ else
 
 	private async Task Refresh()
 	{
+		// Calendar entries.
 		var response = await _timeboxService.GetAll();
 
 		if( response.Success )
 		{
-			Entries = response.Data;
+			_dtoEntries = response.Data;
 		}
 
 		TasksList.Clear();
-		foreach (var entry in Entries)
+		foreach (var entry in _dtoEntries)
 		{
 			var newTask = new Tasks()
 				{
@@ -63,7 +98,74 @@ else
 			TasksList.Add( newTask );
 		}
 
+		// Top favorites.
+		if (response.Success)
+		{
+			ReadTimeboxEntries( ref response.Data );
+		}
+
+
+		if (_dataGrid != null)
+		{
+			await _dataGrid.SetSortAsync( nameof( TimeboxUsageEntry.Duration ), SortDirection.Descending, x => x.Duration );
+		}
+
 		StateHasChanged();
+	}
+
+	private async void OnHourClicked( string dropzone )
+	{
+		var hours = int.Parse( dropzone );
+
+		var date = DateTime.Now.AddHours( hours );
+
+		var fakeTask = new Tasks
+			{
+				ID = -1,
+				DateStart = date,
+				DateEnd = date.AddHours( 1 )
+			};
+
+
+		await OpenTaskDialog( fakeTask );
+	}
+
+	private void OnEntryClicked( DropItem item )
+	{
+		// Your code here
+		Console.WriteLine( $"MudListItem with name {item.Name} was clicked." );
+	}
+
+	private void ItemUpdated( MudItemDropInfo<DropItem> dropItem )
+	{
+		dropItem.Item.Selector = dropItem.DropzoneIdentifier;
+	}
+
+	private void ReadTimeboxEntries( ref List<TimeboxEntryDto> entries )
+	{
+		var dictionary = new Dictionary<string, TimeSpan>();
+
+		foreach (var entry in entries)
+		{
+			var duration = entry.DateEnd - entry.DateStart;
+
+			if (dictionary.TryGetValue( entry.Code, out var existingDuration ))
+			{
+				dictionary[entry.Code] = existingDuration + duration;
+			}
+			else
+			{
+				dictionary.Add( entry.Code, duration );
+			};
+		}
+
+		_usageEntries = dictionary
+			.Select( x => new TimeboxUsageEntry { Code = x.Key, Duration = x.Value } )
+			.OrderByDescending( x => x.Duration )
+			.Take(5)
+			.ToList();
+
+		_usageEntries.OrderBy( x => x.Duration );
 	}
 
 	private DateTime ConvertFromDateTimeOffset( DateTimeOffset dateTime )
@@ -87,14 +189,18 @@ else
 
 
 		var taskClicked = TasksList.FirstOrDefault( t => t.ID == clickTaskParameter.IDList.FirstOrDefault() );
-
-		var parameters = new DialogParameters<DialogTimeboxEntry>() { { x => x.Task, taskClicked } };
-		var options = new DialogOptions { CloseOnEscapeKey = true };
-		var dialog = await _dialogService.ShowAsync<DialogTimeboxEntry>(GetDateName(clickTaskParameter.Day), parameters, options);
-		var result = await dialog.Result;
-		OnTasksUpdated( !result.Canceled );
+		await OpenTaskDialog(taskClicked);
 	}
 
+	private async Task OpenTaskDialog(Tasks taskClicked)
+	{
+		var day = taskClicked.DateStart;
+		var parameters = new DialogParameters<DialogTimeboxEntry>() { { x => x.Task, taskClicked } };
+		var options = new DialogOptions { CloseOnEscapeKey = true };
+		var dialog = await _dialogService.ShowAsync<DialogTimeboxEntry>( GetDateName( day ), parameters, options );
+		var result = await dialog.Result;
+		OnTasksUpdated( !result.Canceled );		
+	}
 
 	private async void DayClick( ClickEmptyDayParameter clickEmptyDayParameter )
 	{
@@ -107,11 +213,8 @@ else
 				DateEnd = clickEmptyDayParameter.Day.AddHours( 1 )
 			};
 
-		var parameters = new DialogParameters<DialogTimeboxEntry>() { { x => x.Task, fakeTask } };
-		var options = new DialogOptions { CloseOnEscapeKey = true };
-		var dialog = await _dialogService.ShowAsync<DialogTimeboxEntry>( GetDateName( clickEmptyDayParameter.Day ), parameters, options );
-		var result = await dialog.Result;
-		OnTasksUpdated( !result.Canceled );
+
+		await OpenTaskDialog(fakeTask);
 	}
 
 	private void DragStart( DragDropParameter dragDropParameter )

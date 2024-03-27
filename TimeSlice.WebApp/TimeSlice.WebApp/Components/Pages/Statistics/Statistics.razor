@@ -16,15 +16,18 @@
     private List<TimeboxUsageEntry> _entries = new List<TimeboxUsageEntry>();
     private MudDataGrid<TimeboxUsageEntry> _dataGrid;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync( bool firstRender )
     {
-        var response = await _timeboxService.GetAll();
-        if (response.Success)
+        if( firstRender )
         {
-            ReadTimeboxEntries( ref response.Data );
-        }
+            var response = await _timeboxService.GetAll();
+            if (response.Success)
+            {
+                ReadTimeboxEntries( ref response.Data );
+            }
 
-        await _dataGrid.SetSortAsync( nameof( TimeboxUsageEntry.Duration ), SortDirection.Descending, x => x.Duration );
+            await _dataGrid.SetSortAsync( nameof( TimeboxUsageEntry.Duration ), SortDirection.Descending, x => x.Duration );
+        }
     }
 
     private void ReadTimeboxEntries(ref List<TimeboxEntryDto> entries)
